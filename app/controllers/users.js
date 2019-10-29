@@ -32,6 +32,12 @@ class UsersCtx {
         ctx.body = user
     }
 
+    async checkOwner(ctx, next) {
+        //验证当前操作的用户是否是本人
+        if (ctx.params.id !== ctx.state.user._id) { ctx.throw(403, '没有权限进行操作') }
+        await next()
+    }
+
     async update(ctx) {
         //更新用户
         ctx.verifyParams({

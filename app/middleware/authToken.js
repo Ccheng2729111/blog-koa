@@ -1,4 +1,5 @@
 const jsonwebtoken = require('jsonwebtoken')
+
 const { secret } = require('../config')
 
 //认证中间件，主要是用来解码token并且将获取到的解码后的数据放在user中
