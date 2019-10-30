@@ -1,6 +1,9 @@
 const jsonwebtoken = require('jsonwebtoken')
 const { secret } = require('../config')
 const User = require('../models/users')
+const moment = require('moment')
+
+moment.locale('zh-cn');
 
 
 //users的控制器，主要是处理调用接口后的逻辑
@@ -38,7 +41,7 @@ class UsersCtx {
 
         const userRole = await User.findById(id)
 
-        if (!userRole) { ctx.throw(401, '请输入正确的id') }
+        if (!userRole) { ctx.throw(401, '未找到该用户') }
         //判断是否是本人操作或者不是admin
         if (userRole.type !== 0 || (ctx.params.id !== ctx.state.user._id)) {
             ctx.throw(403, '没有权限进行操作')
@@ -62,7 +65,8 @@ class UsersCtx {
             ctx.throw(400, '请输入正确格式的手机号码')
         }
 
-        const user = await User.findByIdAndUpdate(ctx.params.id, ctx.request.body, { new: true })   //update后返回最新数据
+        const update_time = moment().format('MMMM Do YYYY, h:mm:ss a')  //加上更新时间
+        const user = await User.findByIdAndUpdate(ctx.params.id, { ...ctx.request.body, update_time }, { new: true })   //update后返回最新数据
         if (!user) { ctx.throw(404) }
         ctx.body = user
     }
