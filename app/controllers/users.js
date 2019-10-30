@@ -9,7 +9,20 @@ moment.locale('zh-cn');
 //users的控制器，主要是处理调用接口后的逻辑
 class UsersCtx {
     async find(ctx) {
-        ctx.body = await User.find()
+        const { pageSize = 10, page = 1, keyword = '' } = ctx.query     //赋一个初始值给参数
+        // const getKeyWordData = await User.find({ name: keyword })
+        const total = await User.count()    //表格所有的数据
+
+        const options = { limit: Number(pageSize), skip: (Number(page) - 1) * Number(pageSize) }
+
+        //model.find() 第一个参数是根据哪个字段查找，第二个字段是需要返回哪些字段，第三个是筛选相关的
+        let returnData = await User.find(keyword.length !== 0 ? { userName: keyword } : {}, null, options, function (err, docs) {
+            if (err) { console.log(err); return; }
+            else { console.log(docs); return; }
+        });
+        ctx.append('X-Pagination-Count', total);     //将当前数据库总数返回给前端
+        ctx.append('X-Pagination-Current-Page', page);  //将当前是第几页返回给前端
+        ctx.body = returnData
     }
 
     async create(ctx) {
